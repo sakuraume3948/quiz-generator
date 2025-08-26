@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    /* 基本的なオプション */
+    "target": "ES2020",                     // どのバージョンのJavaScriptに変換するか
+    "module": "CommonJS",                  // どのモジュールシステムを使うか (★最重要)
+    "strict": true,                        // 厳格な型チェックを有効にする
+    "esModuleInterop": true,               // CommonJSとESMの間の互換性を向上させる
+
+    /* モジュール解決のオプション */
+    "moduleResolution": "node",            // Node.jsと同じ方法でモジュールを探す
+
+    /* 推奨されるオプション */
+    "skipLibCheck": true,                  // 型定義ファイルのチェックをスキップして高速化
+    "forceConsistentCasingInFileNames": true // ファイル名の大文字・小文字を区別する
+  }
+}
