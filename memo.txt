@@ -1,1 +1,21 @@
-test2
+---tsxとtsの違い---
+tsx: htmlなどの見た目を含む。UIを作るファイル。
+ts: ロジックのみ。計算など。
+
+---ファイル説明---
+memo.txt: このファイル
+frontend: 見た目の部分
+	setting/page.tsx: 設定画面を表示
+	quiz/page.tsx: 問題画面を表示
+	result/page.tsx: 結果画面を表示 ここからsettingやquestionにも飛べる
+	parts/page.tsx: 見た目の部品を置く
+		SettingForm.tsx: 設定フォームの部分
+		FileDropzone.tsx: ファイルをドラッグドロップする部分
+		QuizCard.tsx: 問題の部分
+	api.ts: backendのAPIと通信する部分
+
+backend: 処理の部分
+	index.ts: サーバーを起動
+	quiz.ts: クイズAPIの処理
+	gemini: Geminiとの連携処理
+	parser: ファイルやURLの読み取り処理

@@ -40,7 +40,9 @@ export async function generateQuizWithGemini(text: string, settings: any): Promi
     #指示
     - 形式: ${settings.format || 'random'}
     - 問題数: ${settings.quantity || 'auto'}
-    - 回答は必ずJSON形式で、以下の配列の構造に厳密に従ってください。
+    - 回答は必ずJSON形式で、以下の配列の構造に「厳密に」従ってください。
+    - 「必ず」「講義資料」のテキストを情報源として使用し、あなたの持つ他の知識はほぼ使用しないでください。
+    - もし講義資料の内容だけではクイズが作れない場合は、JSONではなく "error": "資料の内容が不十分でクイズを作成できませんでした。" という形式で返答してください。
     - 各問題には "quizID", "format", "questionText", "options"(選択式の場合), "answer", "explanation" を含めてください。
       
     \`\`\`json
@@ -69,8 +71,6 @@ export async function generateQuizWithGemini(text: string, settings: any): Promi
       config,
       contents,
     });
-    let fileIndex = 0;
-    console.log(response.text);
 
     const responseText = response.text;
 
@@ -81,6 +81,7 @@ export async function generateQuizWithGemini(text: string, settings: any): Promi
     // ```json ... ``` のようなマークダウン形式で返ってくることがあるため、それを取り除く
     const jsonString = responseText.replace(/^```json\s*|```$/g, '').trim();
     let quizData;
+    console.log(jsonString);
     try {
       quizData = JSON.parse(jsonString);
     } catch (parseError) {
