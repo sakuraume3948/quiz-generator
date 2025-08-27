@@ -1,103 +1,153 @@
-import Image from "next/image";
+'use client'; // ユーザー操作を扱う
+import { useState } from 'react';
+import SettingForm from '../parts/SettingForm';
+import QuizCard from '../parts/QuizCard';
+import LoadingSpinner from '../parts/LoadingSpinner';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [files, setFiles] = useState<File[]>([]); // 添付されたファイルを記憶
+  const [urls, setUrls] = useState<string>(''); // 入力されたURL文字列
+  const [settings, setSettings] = useState({  // 各種設定
+    quantity: 'auto',
+    format: 'random',
+  });
+  const [quizData, setQuizData] = useState<any[] | null>(null); // 生成されたクイズ
+  const [isLoading, setIsLoading] = useState<boolean>(false); // ローディング中か否か
+  const [error, setError] = useState<string | null>(null); // エラーメッセージ
+  const [results, setResults] = useState<{ score: number; maxscore: number; details: any[] } | null>(null); //スコア
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  //回答を処理
+  const handleAnswerChange = (quizID: string, answer: string) => {
+    setUserAnswers(prevAnswers => ({
+      ...prevAnswers, // 以前の回答を維持しつつ
+      [quizID]: answer, // 今回の回答を更新
+    }));
+  };
+
+  // ユーザーの回答を記憶する
+  // { "q001": "選択肢A", "q002": "記述した答え" } のような形式で保存
+  const [userAnswers, setUserAnswers] = useState<{ [key: string]: string }>({});
+
+  const handleCreateQuiz = async () => {
+    setIsLoading(true); // ローディング開始
+    setError(null);     // 以前のエラーをクリア
+    setQuizData(null);  // 以前のクイズをクリア
+
+    try {
+      const response = await fetch('http://localhost:3001/api/create-quiz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          settings: settings,
+          urls: urls.split('\n').filter(url => url.trim() !== ''), // 改行で分割し、空行を除外
+        }),
+      });
+
+      // OKじゃなければエラーを出力
+      if (!response.ok) {
+        throw new Error(`APIエラー: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setQuizData(data); // 受け取ったクイズをStateに記憶
+
+    } catch (err: any) {
+      console.error("クイズの作成に失敗しました:", err);
+      setError('クイズの作成に失敗しました。もう一度お試しください。'); // エラーメッセージをStateに保存
+    } finally {
+      setIsLoading(false); // ローディング終了
+    }
+  };
+
+  const handleSubmitQuiz = () => {
+    if (!quizData) return;
+
+    let score = 0;
+    let maxscore = quizData.length;
+    const details = quizData.map(quiz => {
+      const userAnswer = userAnswers[quiz.quizID];
+      const isCorrect = userAnswer === quiz.answer; // 単純な文字列比較で正誤を判定
+      if (isCorrect) {
+        score++;
+      }
+      return { ...quiz, userAnswer, isCorrect };
+    });
+
+    setResults({
+      score: score * 10,
+      maxscore: maxscore * 10,
+      details: details,
+    });
+  };
+
+
+
+  return (
+    <main style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
+      <h1>クイズ自動生成アプリ</h1>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : error ? (
+        <div style={{ color: 'red' }}>
+          <p>{error}</p>
+          <button onClick={() => setError(null)}>戻る</button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      ) : results ? (
+        // 結果表示画面を追加 
+        <section>
+          <h2>採点結果</h2>
+          <p style={{ fontSize: '24px', fontWeight: 'bold' }}>スコア: {results.score.toFixed(0)}/{results.maxscore.toFixed(0)} 点</p>
+          {results.details.map((detail) => (
+            <div key={detail.quizID} style={{ border: '1px solid #ccc', padding: '16px', margin: '16px', backgroundColor: detail.isCorrect ? '#e9fce9' : '#fce9e9' }}>
+              <p><strong>問題:</strong> {detail.questionText}</p>
+              <p><strong>あなたの回答:</strong> {detail.userAnswer || '(未回答)'}</p>
+              <p><strong>正解:</strong> {detail.answer}</p>
+              <p><strong>解説:</strong> {detail.explanation}</p>
+            </div>
+          ))}
+          <button onClick={() => { setQuizData(null); setUserAnswers({}); setResults(null); }}>もう一度挑戦する</button>
+        </section>
+      ) : quizData ? (
+        <section>
+          <h2>生成されたクイズ</h2>
+          {quizData.map((quiz, index) => (
+            <QuizCard
+              key={quiz.quizID || index}
+              quiz={quiz}
+              userAnswer={userAnswers[quiz.quizID]}
+              onAnswerChange={handleAnswerChange}
+            />
+          ))}
+          {/* 採点ボタンにhandleSubmitQuizをセット */}
+          <button onClick={handleSubmitQuiz} style={{ marginTop: '20px', padding: '10px' }}>採点する</button>
+          <button onClick={() => { setQuizData(null); setUserAnswers({}); }} style={{ marginTop: '20px' }}>
+            設定画面に戻る
+          </button>
+        </section>
+      ) : (
+        <section>
+          <h2>設定</h2>
+          <SettingForm
+            urls={urls}
+            onUrlsChange={setUrls}
+            onSubmit={handleCreateQuiz}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        </section>
+      )}
+
+      <hr style={{ margin: '40px 0' }} />
+      <section>
+        <h2>クイズ表示（サンプル）</h2>
+      </section>
+
+      <hr style={{ margin: '40px 0' }} />
+
+      <section>
+        <h2>ローディング表示（サンプル）</h2>
+        <LoadingSpinner />
+      </section>
+    </main>
   );
 }
