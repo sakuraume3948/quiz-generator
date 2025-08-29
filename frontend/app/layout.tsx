@@ -27,7 +27,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <header className="bg-white dark:bg-gray-800 shadow-md">
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              クイズ自動生成アプリ
+            </h1>
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8">{children}</main>
       </body>
     </html>
   );
