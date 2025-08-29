@@ -9,12 +9,17 @@
   "dependencies": {
     "@google/genai": "^1.15.0",
     "@google/generative-ai": "^0.24.1",
+    "@types/multer": "^2.0.0",
+    "@types/pdf-parse": "^1.1.5",
     "axios": "^1.11.0",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "iconv-lite": "^0.7.0",
-    "mime": "^4.0.7"
+    "mammoth": "^1.10.0",
+    "mime": "^4.0.7",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1"
   }
 }

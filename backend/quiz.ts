@@ -6,8 +6,13 @@ const router = express.Router();
 
 router.post('/create-quiz', async (req, res) => {
   try {
+    // multerでパースされたデータを取得（存在しない場合はデフォルト値を設定）
+    const settings = req.body.settings ? JSON.parse(req.body.settings) : {};
+    const urls = req.body.urls ? JSON.parse(req.body.urls) : [];
+    const files = (req.files as Express.Multer.File[]) || [];
+
     // テキストを抽出
-    const extractedText = await parseInput(req.body);
+    const extractedText = await parseInput({ settings, urls, files });
     if (!extractedText) {
       return res.status(400).json({ error: 'No text could be extracted from the input.' });
     }
@@ -17,7 +22,7 @@ router.post('/create-quiz', async (req, res) => {
     console.log('-------------------------');
 
     // 抽出したテキストでクイズを作成
-    const quiz = await generateQuizWithGemini(extractedText, req.body.settings);
+    const quiz = await generateQuizWithGemini(extractedText, settings);
 
     // クイズを返す
     res.json(quiz);
