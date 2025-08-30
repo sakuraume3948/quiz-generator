@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     /* 基本的なオプション */
+    "outDir": "./dist",
     "target": "ES2020",                     // どのバージョンのJavaScriptに変換するか
     "module": "CommonJS",                  // どのモジュールシステムを使うか (★最重要)
     "strict": true,                        // 厳格な型チェックを有効にする
@@ -11,6 +12,11 @@
 
     /* 推奨されるオプション */
     "skipLibCheck": true,                  // 型定義ファイルのチェックをスキップして高速化
-    "forceConsistentCasingInFileNames": true // ファイル名の大文字・小文字を区別する
-  }
+    "forceConsistentCasingInFileNames": true // ファイル名の大文字・小文字を区別する 
+  },
+    "include": [
+    "*.ts",
+    "routes/*.ts",
+    "services/*.ts"
+  ]
 }
