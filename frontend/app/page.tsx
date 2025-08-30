@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import SettingForm from '../parts/SettingForm';
 import QuizCard from '../parts/QuizCard';
-import LoadingSpinner from '../parts/LoadingSpinner';
 
 export default function Home() {
   // localStorageから値を取得、なければ空文字
@@ -72,10 +71,10 @@ export default function Home() {
       }
       // バックエンドがエラーを返してきた場合（例：内容不十分）
       if (data.error) {
-          setError(data.error);
-          setQuizData(null);
+        setError(data.error);
+        setQuizData(null);
       } else {
-          setQuizData(data);
+        setQuizData(data);
       }
     } catch (err: any) {
       console.error("クイズの作成に失敗しました:", err);
@@ -113,15 +112,20 @@ export default function Home() {
   };
 
   const renderContent = () => {
-    if (isLoading) return <LoadingSpinner />;
+    if (isLoading) return (
+      <div>
+        <h2>クイズを作成中...</h2>
+        <p>しばらくお待ちください。</p>
+      </div>
+    );
     if (error) return (
-        <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-            <h2 className="text-xl font-bold mb-4 text-red-600">エラーが発生しました</h2>
-            <p className="text-gray-700 mb-6">{error}</p>
-            <button onClick={goToSettings} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                問題設定画面へ
-            </button>
-        </div>
+      <div className="bg-white shadow-lg rounded-lg p-6 text-center">
+        <h2 className="text-xl font-bold mb-4 text-red-600">エラーが発生しました</h2>
+        <p className="text-gray-700 mb-6">{error}</p>
+        <button onClick={goToSettings} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          問題設定画面へ
+        </button>
+      </div>
     );
     if (results) return (
       <div className="bg-white shadow-lg rounded-lg p-6">
@@ -155,12 +159,12 @@ export default function Home() {
           ))}
         </div>
         <div className="flex justify-between mt-8">
-            <button onClick={goToSettings} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                設定画面に戻る
-            </button>
-            <button onClick={handleSubmitQuiz} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                採点する
-            </button>
+          <button onClick={goToSettings} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            設定画面に戻る
+          </button>
+          <button onClick={handleSubmitQuiz} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            採点する
+          </button>
         </div>
       </div>
     );
