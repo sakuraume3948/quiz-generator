@@ -60,7 +60,9 @@ export default function Home() {
     });
 
     try {
-      const response = await fetch('http://localhost:3001/api/create-quiz', {
+      //http://localhost:3001/api/create-quiz
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/create-quiz`, {
         method: 'POST',
         body: formData,
       });
